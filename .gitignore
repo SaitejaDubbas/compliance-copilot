@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+.ipynb_checkpoints/
+
+# Generated data (regenerable with data/prepare_data.py) -- keep labels.json
+data/train.jsonl
+data/val.jsonl
+data/test.jsonl
+
+# Model weights / adapters (stored on the Hugging Face Hub instead)
+*.bin
+*.safetensors
+adapters/
+outputs/
+checkpoints/
+
+# Hugging Face cache
+.cache/
+
+# Claude Code local-only settings
+.claude/settings.local.json

@@ -1,0 +1,15 @@
+# Runtime dependencies for the FastAPI app + LangChain agent.
+# (Training-only tools like bitsandbytes, trl, and datasets are installed
+#  inside the Colab notebook in Phase 2, so they are not needed here.)
+
+fastapi
+uvicorn[standard]
+pydantic
+transformers
+torch
+peft
+accelerate
+langchain
+langchain-community
+gradio
+huggingface-hub
