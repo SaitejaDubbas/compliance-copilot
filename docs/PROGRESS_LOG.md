@@ -30,3 +30,20 @@ issues surfaced and were fixed in the saved notebook so future runs work end to 
    placeholder, which didn't match the logged-in account and got rejected. Fixed by
    deriving the username from `huggingface_hub.whoami()` immediately before pushing,
    so the push always targets the account actually logged into the notebook.
+
+## Phase 4.5 — RAG chatbot over a contract
+
+Added `app/rag.py` plus `POST /rag/index` and `POST /rag/ask` to the FastAPI app.
+
+Retrieval is entirely local and free: documents are chunked with
+`RecursiveCharacterTextSplitter`, embedded with `sentence-transformers/all-MiniLM-L6-v2`
+via `HuggingFaceEmbeddings`, and indexed in an in-memory FAISS store. Only the final
+answer-generation step calls out, to `ChatGroq` (`llama-3.3-70b-versatile`,
+temperature 0), grounded strictly in the retrieved chunks via a system prompt that
+requires it to reply "I don't know based on this contract." when the answer isn't in
+the retrieved context.
+
+**Result:** `/rag/index` indexed a sample NDA-style contract; `/rag/ask` answered
+"How long does the confidentiality obligation last?" with "five (5) years" plus the
+supporting source chunk (HTTP 200), and correctly refused an out-of-context question
+about a late-payment penalty that wasn't in the document.

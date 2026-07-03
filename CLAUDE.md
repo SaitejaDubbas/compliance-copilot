@@ -35,10 +35,19 @@ beyond Claude Code itself).
       DONE — ran successfully in Colab. Accuracy 20.00% -> 94.33% (+74.33 pp), macro-F1
       0.1013 -> 0.9439 (+84.26 pp). Adapter pushed to
       `SaitejaDubbas/compliance-copilot-llama32-1b-lora`.
-- [ ] **Phase 3 — Front desk** (`app/model.py`, `app/main.py`): load base model + adapter,
-      async FastAPI `/classify` endpoint.
-- [ ] **Phase 4 — Manager** (`app/agent.py`): LangChain agent that splits a document into
+- [x] **Phase 3 — Front desk** (`app/model.py`, `app/main.py`): load base model + adapter,
+      async FastAPI `/classify` endpoint. DONE — CPU-only (float32, `low_cpu_mem_usage`),
+      model loaded once at import, reuses the exact Phase 1 `SYSTEM_PROMPT`/`build_user_prompt`.
+- [x] **Phase 4 — Manager** (`app/agent.py`): LangChain agent that splits a document into
       clauses, classifies each via the model, applies simple compliance rules, writes a report.
+      DONE — `RunnableLambda` chain (split -> classify -> apply rules -> report), reuses
+      `classify_clause` (no separate model load), `/review` endpoint tested successfully.
+- [x] **Phase 4.5 — RAG chatbot** (`app/rag.py`): index a contract and answer questions
+      grounded only in its text. DONE — local `sentence-transformers/all-MiniLM-L6-v2`
+      embeddings + in-memory FAISS for retrieval, `ChatGroq` (`llama-3.3-70b-versatile`,
+      temp 0) for generation. `/rag/index` and `/rag/ask` tested successfully: answered
+      "five (5) years" with sources for an in-context question, and correctly replied
+      "I don't know based on this contract." for an out-of-context one.
 - [ ] **Phase 5 — Docker** (`Dockerfile`): containerize the app.
 - [ ] **Phase 6 — Deploy**: HuggingFace Spaces (Docker SDK), get a live public link.
 - [ ] **Phase 7 — Polish**: README results table with real numbers, demo GIF, resume wording.
@@ -68,6 +77,9 @@ with a BFloat16 gradient-unscale error); (3) the save/push cell now derives
 the placeholder in the config cell, so it can't 403 against a nonexistent namespace.
 See `docs/PROGRESS_LOG.md` for details.
 
-Next action: build Phase 3 — `app/model.py` + `app/main.py`, loading
-`unsloth/Llama-3.2-1B-Instruct` plus the `SaitejaDubbas/compliance-copilot-llama32-1b-lora`
-adapter behind an async FastAPI `/classify` endpoint.
+Phases 3, 4, and 4.5 are done: the FastAPI app (`app/main.py`) now serves
+`/health`, `/classify`, `/review`, `/rag/index`, and `/rag/ask`. `GROQ_API_KEY` is
+read from a local, git-ignored `.env` via `python-dotenv` (see `.env.example`) —
+never hardcoded.
+
+Next action: build Phase 5 — `Dockerfile` to containerize the app.

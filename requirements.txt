@@ -13,3 +13,11 @@ langchain
 langchain-community
 gradio
 huggingface-hub
+
+# Phase 4.5: RAG chatbot
+python-dotenv
+langchain-groq
+langchain-huggingface
+langchain-text-splitters
+faiss-cpu
+sentence-transformers
