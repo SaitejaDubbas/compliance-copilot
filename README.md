@@ -1,3 +1,13 @@
+---
+title: Compliance Copilot
+emoji: 🐳
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Compliance Copilot
 
 **Automated contract-clause classification and compliance-review workflows, powered by a fine-tuned Llama-3 model.**
