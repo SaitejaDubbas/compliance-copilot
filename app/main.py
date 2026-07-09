@@ -1,10 +1,12 @@
-"""Phase 3/4/4.5 -- the front desk. A thin async HTTP layer over app/model.py,
-app/agent.py, and app/rag.py.
+"""Phase 3/4/4.5/7 -- the front desk. A thin async HTTP layer over app/model.py,
+app/agent.py, and app/rag.py, plus a landing page for non-technical visitors.
 """
 
 import asyncio
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from app.agent import review_document
@@ -12,6 +14,8 @@ from app.model import classify_clause
 from app.rag import answer_question, index_document
 
 app = FastAPI(title="Compliance Copilot", version="0.1.0")
+
+INDEX_HTML = (Path(__file__).resolve().parent / "static" / "index.html").read_text(encoding="utf-8")
 
 
 class ClauseRequest(BaseModel):
@@ -56,6 +60,11 @@ class AskRequest(BaseModel):
 class AskResponse(BaseModel):
     answer: str
     sources: list[str]
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index():
+    return INDEX_HTML
 
 
 @app.get("/health")

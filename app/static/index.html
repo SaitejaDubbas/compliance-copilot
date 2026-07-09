@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compliance Copilot</title>
+<style>
+  :root {
+    --color-bg: #f7f8fa;
+    --color-card: #ffffff;
+    --color-border: #e2e5eb;
+    --color-text: #1f2430;
+    --color-muted: #5b6472;
+    --color-primary: #2952cc;
+    --color-primary-hover: #1f3fa0;
+    --color-success-bg: #eef7ee;
+    --color-success-border: #bfe3bf;
+    --color-error-bg: #fdeeee;
+    --color-error-border: #f3b8b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 20px 64px; }
+  header h1 { margin-bottom: 4px; font-size: 1.8rem; }
+  .subtitle { color: var(--color-muted); margin-top: 0; }
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+  .card h2 { margin-top: 0; font-size: 1.15rem; }
+  .desc { color: var(--color-muted); font-size: 0.92rem; margin-top: -6px; }
+  textarea, input[type="text"] {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    resize: vertical;
+  }
+  button {
+    margin-top: 12px;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) { background: var(--color-primary-hover); }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .ask-row { display: flex; gap: 10px; margin-top: 18px; }
+  .ask-row input { flex: 1; }
+  .ask-row button { margin-top: 0; }
+  .result {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    display: none;
+  }
+  .result:not(:empty) { display: block; }
+  .result.loading { background: #f0f2f5; color: var(--color-muted); }
+  .result.success { background: var(--color-success-bg); border: 1px solid var(--color-success-border); }
+  .result.error { background: var(--color-error-bg); border: 1px solid var(--color-error-border); color: #a12727; }
+  .result ul { margin: 8px 0 0; padding-left: 20px; }
+  .result .warn { color: #8a5a10; font-weight: 600; }
+  .result .ok { color: #2c7a2c; font-weight: 600; }
+  footer { text-align: center; color: var(--color-muted); font-size: 0.85rem; margin-top: 32px; }
+  footer a { color: var(--color-primary); }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Compliance Copilot</h1>
+    <p class="subtitle">Automated contract-clause classification and compliance review, powered by a fine-tuned Llama-3 model.</p>
+  </header>
+
+  <section class="card">
+    <h2>1. Classify a clause</h2>
+    <p class="desc">Paste a single contract clause to see which of the 10 clause types it belongs to.</p>
+    <textarea id="classify-input" rows="3">This Agreement shall be governed by the laws of the State of Delaware.</textarea>
+    <button onclick="classifyClause(this)">Classify</button>
+    <div class="result" id="classify-result"></div>
+  </section>
+
+  <section class="card">
+    <h2>2. Review a contract</h2>
+    <p class="desc">Paste a multi-clause contract to split it into clauses, classify each one, and check for missing required clause types.</p>
+    <textarea id="review-input" rows="9">1. Governing Law. This Agreement shall be governed by the laws of the State of Delaware.
+2. Notices. All notices shall be given in writing and sent to the addresses set forth above.
+3. Amendments. This Agreement may only be amended by a written instrument signed by both parties.
+
+Confidentiality. Each party agrees to keep confidential all non-public information disclosed by the other party in connection with this Agreement, and shall not disclose such information to any third party without prior written consent.
+
+This Agreement may be executed in counterparts, each of which shall be deemed an original.</textarea>
+    <button onclick="reviewDocument(this)">Review</button>
+    <div class="result" id="review-result"></div>
+  </section>
+
+  <section class="card">
+    <h2>3. Chat with a contract</h2>
+    <p class="desc">Index a contract, then ask a question about it. Answers are grounded only in the indexed text.</p>
+    <textarea id="rag-index-input" rows="8">This Non-Disclosure Agreement is entered into between Acme Corp and Beta LLC.
+
+Confidentiality. Each party agrees to keep confidential all non-public information disclosed by the other party for a period of five (5) years from the date of disclosure.
+
+Governing Law. This Agreement shall be governed by the laws of the State of Delaware.
+
+Term. This Agreement shall remain in effect for two (2) years unless terminated earlier by mutual written consent of both parties.</textarea>
+    <button onclick="indexDocument(this)">Index Document</button>
+    <div class="result" id="rag-index-result"></div>
+
+    <div class="ask-row">
+      <input type="text" id="rag-question-input" value="How long does the confidentiality obligation last?">
+      <button onclick="askQuestion(this)">Ask</button>
+    </div>
+    <div class="result" id="rag-ask-result"></div>
+  </section>
+
+  <footer>
+    <p>Prefer raw API access? See the <a href="/docs">interactive API docs</a>.</p>
+  </footer>
+</div>
+
+<script>
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function setLoading(el) {
+    el.textContent = "Loading... (CPU inference can take a few seconds)";
+    el.className = "result loading";
+  }
+
+  function setError(el, err) {
+    el.textContent = "Error: " + err.message;
+    el.className = "result error";
+  }
+
+  async function postJSON(url, body) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      const detail = data && data.detail ? JSON.stringify(data.detail) : res.statusText;
+      throw new Error(`request failed (${res.status}): ${detail}`);
+    }
+    return data;
+  }
+
+  async function withButton(btn, out, fn) {
+    btn.disabled = true;
+    setLoading(out);
+    try {
+      await fn();
+    } catch (err) {
+      setError(out, err);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function classifyClause(btn) {
+    const out = document.getElementById("classify-result");
+    withButton(btn, out, async () => {
+      const clause = document.getElementById("classify-input").value;
+      const data = await postJSON("/classify", { clause });
+      out.className = "result success";
+      out.innerHTML = `<strong>Predicted type:</strong> ${escapeHtml(data.label)}`;
+    });
+  }
+
+  function reviewDocument(btn) {
+    const out = document.getElementById("review-result");
+    withButton(btn, out, async () => {
+      const document_ = document.getElementById("review-input").value;
+      const data = await postJSON("/review", { document: document_ });
+      let html = `<strong>${data.num_clauses} clause(s) found</strong>`;
+      html += "<ul>" + data.clauses.map(c => {
+        const snippet = c.text.length > 120 ? c.text.slice(0, 120) + "..." : c.text;
+        return `<li><strong>${escapeHtml(c.label)}:</strong> ${escapeHtml(snippet)}</li>`;
+      }).join("") + "</ul>";
+      html += data.missing_required.length
+        ? `<p class="warn">Missing required clause types: ${data.missing_required.map(escapeHtml).join(", ")}</p>`
+        : `<p class="ok">All required clause types are present.</p>`;
+      out.className = "result success";
+      out.innerHTML = html;
+    });
+  }
+
+  function indexDocument(btn) {
+    const out = document.getElementById("rag-index-result");
+    withButton(btn, out, async () => {
+      const doc = document.getElementById("rag-index-input").value;
+      const data = await postJSON("/rag/index", { document: doc });
+      out.className = "result success";
+      out.textContent = `Indexed ${data.num_chunks} chunk(s). You can now ask questions below.`;
+    });
+  }
+
+  function askQuestion(btn) {
+    const out = document.getElementById("rag-ask-result");
+    withButton(btn, out, async () => {
+      const question = document.getElementById("rag-question-input").value;
+      const data = await postJSON("/rag/ask", { question });
+      let html = `<strong>Answer:</strong> ${escapeHtml(data.answer)}`;
+      if (data.sources && data.sources.length) {
+        html += "<details><summary>Sources</summary><ul>" +
+          data.sources.map(s => `<li>${escapeHtml(s)}</li>`).join("") + "</ul></details>";
+      }
+      out.className = "result success";
+      out.innerHTML = html;
+    });
+  }
+</script>
+</body>
+</html>
