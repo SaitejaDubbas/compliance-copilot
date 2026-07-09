@@ -47,3 +47,24 @@ the retrieved context.
 "How long does the confidentiality obligation last?" with "five (5) years" plus the
 supporting source chunk (HTTP 200), and correctly refused an out-of-context question
 about a late-payment penalty that wasn't in the document.
+
+## Phase 5 + 6 — Docker + Hugging Face Spaces deployment
+
+Containerized the app (`Dockerfile`, `.dockerignore`) and deployed it to a Hugging
+Face Docker Space.
+
+**Live at: https://saitejadubbas-compliance-copilot.hf.space**
+
+All five endpoints were confirmed working directly on the deployed Space (not just
+locally):
+
+- `/health` -> ok
+- `/classify` -> "Governing Laws"
+- `/review`
+- `/rag/index` -> indexed successfully
+- `/rag/ask` -> grounded "five (5) years" answer via Groq (HTTP 200)
+
+The `GROQ_API_KEY` Space secret works correctly at runtime — confirmed by the
+`/rag/ask` result above, which requires a live call to Groq for answer generation.
+No `.env` file is present in the deployed image; the key is injected purely as a
+runtime environment variable by the Space, exactly as designed.

@@ -48,11 +48,16 @@ beyond Claude Code itself).
       temp 0) for generation. `/rag/index` and `/rag/ask` tested successfully: answered
       "five (5) years" with sources for an in-context question, and correctly replied
       "I don't know based on this contract." for an out-of-context one.
-- [ ] **Phase 5 — Docker** (`Dockerfile`): containerize the app. Files built
-      (`Dockerfile`, `.dockerignore`) — CPU-only torch wheel, non-root user (HF Spaces
-      requirement), `libgomp1` for torch/FAISS, serves on `0.0.0.0:7860`. NOT yet built
-      or run (no local Docker install; needs local verification before ticking done).
-- [ ] **Phase 6 — Deploy**: HuggingFace Spaces (Docker SDK), get a live public link.
+- [x] **Phase 5 — Docker** (`Dockerfile`): containerize the app. DONE — CPU-only torch
+      wheel, non-root user (HF Spaces requirement), `libgomp1` for torch/FAISS, serves
+      on `0.0.0.0:7860`. Built and verified via the Hugging Face Space's own Docker
+      build (Phase 6), since no local Docker install was available to test with first.
+- [x] **Phase 6 — Deploy**: HuggingFace Spaces (Docker SDK), get a live public link.
+      DONE — live at https://saitejadubbas-compliance-copilot.hf.space. All five
+      endpoints confirmed working on the Space: `/health` ok, `/classify` ->
+      "Governing Laws", `/review`, `/rag/index` indexed, `/rag/ask` -> grounded
+      "five (5) years" answer via Groq (HTTP 200). The `GROQ_API_KEY` Space secret
+      works correctly at runtime.
 - [ ] **Phase 7 — Polish**: README results table with real numbers, demo GIF, resume wording.
 
 ## Conventions
@@ -85,6 +90,10 @@ Phases 3, 4, and 4.5 are done: the FastAPI app (`app/main.py`) now serves
 read from a local, git-ignored `.env` via `python-dotenv` (see `.env.example`) —
 never hardcoded.
 
-Phase 5's `Dockerfile`/`.dockerignore` are written but unverified (no Docker on this
-machine) — next action: build and run the image locally to confirm it serves
-correctly, then tick Phase 5 and move to Phase 6 (HuggingFace Spaces deploy).
+Phases 5 and 6 are done. The app is fully deployed and live on a Hugging Face Docker
+Space at https://saitejadubbas-compliance-copilot.hf.space. All five endpoints were
+confirmed working directly on the Space (not just locally), including `/rag/ask`,
+which proves the `GROQ_API_KEY` Space secret is wired up correctly at runtime.
+
+Next action: Phase 7 — polish. README results table is already filled in with real
+numbers; still need a demo GIF and resume wording.

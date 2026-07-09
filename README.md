@@ -8,6 +8,8 @@ app_port: 7860
 pinned: false
 ---
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Hugging%20Face%20Space-blue?logo=huggingface)](https://saitejadubbas-compliance-copilot.hf.space/docs)
+
 # Compliance Copilot
 
 **Automated contract-clause classification and compliance-review workflows, powered by a fine-tuned Llama-3 model.**
@@ -91,7 +93,7 @@ curl -X POST localhost:8000/classify -H "Content-Type: application/json" \
 
 ## Live demo
 
-Deployed on Hugging Face Spaces: `link added after Phase 6`
+Deployed on Hugging Face Spaces: **https://saitejadubbas-compliance-copilot.hf.space** ([Swagger UI](https://saitejadubbas-compliance-copilot.hf.space/docs))
 
 ## License
 
